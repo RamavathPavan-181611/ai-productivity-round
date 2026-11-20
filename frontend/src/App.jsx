@@ -1,122 +1,207 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
+import Sidebar from './components/Sidebar';
+import ChatWindow from './components/ChatWindow';
+import {
+  createThread,
+  deleteThread,
+  getExportUrl,
+  getThread,
+  listThreads,
+  streamMessage,
+  togglePin,
+} from './api/chatApi';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [threads, setThreads] = useState([]);
+  const [activeId, setActiveId] = useState(null);
+  const [thread, setThread] = useState(null);
+  const [tone, setTone] = useState('Professional');
+  const [prompt, setPrompt] = useState('');
+  const [query, setQuery] = useState('');
+  const [streaming, setStreaming] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  async function refreshThreads(search = '') {
+    setLoading(true);
+    try {
+      const data = await listThreads(search);
+      setThreads(data);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    refreshThreads();
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => refreshThreads(query), 250);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
+  async function selectThread(id) {
+    setError('');
+    try {
+      const data = await getThread(id);
+      setThread(data);
+      setActiveId(id);
+      setPrompt('');
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  }
+
+  async function newThread() {
+    setError('');
+    try {
+      const created = await createThread();
+      setThread(created);
+      setActiveId(created._id);
+      setPrompt('');
+      await refreshThreads(query);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  }
+
+  async function pinThread(id) {
+    try {
+      await togglePin(id);
+      await refreshThreads(query);
+      if (activeId === id) await selectThread(id);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  }
+
+  async function removeThread(id) {
+    if (!window.confirm('Delete this conversation?')) return;
+    try {
+      await deleteThread(id);
+      if (activeId === id) {
+        setActiveId(null);
+        setThread(null);
+      }
+      await refreshThreads(query);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  }
+
+  function exportThread(id) {
+    window.open(getExportUrl(id), '_blank', 'noopener,noreferrer');
+  }
+
+  async function sendMessage(value) {
+    if (!thread) {
+      try {
+        const created = await createThread();
+        setThread(created);
+        setActiveId(created._id);
+        await refreshThreads(query);
+        await sendToThread(created._id, value);
+      } catch (requestError) {
+        setError(requestError.message);
+      }
+      return;
+    }
+    await sendToThread(thread._id, value);
+  }
+
+  async function sendToThread(id, value) {
+    setError('');
+    setPrompt('');
+    setStreaming(true);
+
+    setThread((current) => ({
+      ...current,
+      messages: [
+        ...(current?.messages || []),
+        { role: 'user', content: value, tone },
+        { role: 'assistant', content: '', tone },
+      ],
+    }));
+
+    try {
+      await streamMessage(id, value, tone, (event, data) => {
+        if (event === 'token') {
+          setThread((current) => {
+            if (!current) return current;
+            const messages = [...current.messages];
+            const assistantIndex = messages.length - 1;
+            if (messages[assistantIndex]?.role === 'assistant') {
+              messages[assistantIndex] = {
+                ...messages[assistantIndex],
+                content: `${messages[assistantIndex].content}${data.token}`,
+              };
+            }
+            return { ...current, messages };
+          });
+        }
+        if (event === 'done') {
+          setThread((current) => {
+            if (!current) return current;
+            const messages = [...current.messages];
+            const assistantIndex = messages.length - 1;
+            messages[assistantIndex] = {
+              ...messages[assistantIndex],
+              content: data.content,
+              metrics: data.metrics,
+            };
+            return { ...current, messages };
+          });
+        }
+      });
+      await selectThread(id);
+      await refreshThreads(query);
+    } catch (requestError) {
+      setError(requestError.message);
+      setThread((current) => {
+        if (!current) return current;
+        const messages = [...current.messages];
+        if (messages.at(-1)?.role === 'assistant') messages.pop();
+        return { ...current, messages };
+      });
+    } finally {
+      setStreaming(false);
+    }
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="app-shell">
+      <Sidebar
+        threads={threads}
+        activeId={activeId}
+        query={query}
+        onQueryChange={setQuery}
+        onSelect={selectThread}
+        onNew={newThread}
+        onPin={pinThread}
+        onDelete={removeThread}
+        onExport={exportThread}
+        loading={loading}
+      />
+      <ChatWindow
+        thread={thread}
+        streaming={streaming}
+        tone={tone}
+        onToneChange={setTone}
+        onSend={sendMessage}
+        onExport={exportThread}
+        prompt={prompt}
+        onPromptChange={setPrompt}
+      />
+      {error && (
+        <div className="error-toast" role="alert">
+          {error}
+          <button type="button" onClick={() => setError('')}>×</button>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      )}
+    </div>
+  );
 }
-
-export default App

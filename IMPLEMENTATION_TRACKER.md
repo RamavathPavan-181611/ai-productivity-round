@@ -51,18 +51,18 @@
 
 ### 5. Frontend UI
 
-- [ ] Replace scaffold UI with the AI chat assistant interface
-- [ ] Build `Sidebar.jsx` with thread history
-- [ ] Add thread search from the server
-- [ ] Add pin and delete controls
-- [ ] Add Markdown export control
-- [ ] Build `ChatWindow.jsx` with distinct user and AI bubbles
-- [ ] Display character-by-character SSE streaming
-- [ ] Build `ToneSelector.jsx` for Professional, Casual, and Concise
-- [ ] Create `chatApi.js` for HTTP and SSE requests
-- [ ] Add loading, empty, and error states
-- [ ] Add responsive custom CSS
-- [ ] Remove unused Vite scaffold assets
+- [x] Replace scaffold UI with the AI chat assistant interface
+- [x] Build `Sidebar.jsx` with thread history
+- [x] Add thread search from the server
+- [x] Add pin and delete controls
+- [x] Add Markdown export control
+- [x] Build `ChatWindow.jsx` with distinct user and AI bubbles
+- [x] Display character-by-character SSE streaming
+- [x] Build `ToneSelector.jsx` for Professional, Casual, and Concise
+- [x] Create `chatApi.js` for HTTP and SSE requests
+- [x] Add loading, empty, and error states
+- [x] Add responsive custom CSS
+- [x] Remove unused Vite scaffold assets
 
 ### 6. Integration and Verification
 
