@@ -33,13 +33,13 @@
 
 ### 3. Thread API
 
-- [ ] `POST /api/threads` - create a thread
-- [ ] `GET /api/threads?q=` - search, pin-first, and recent-first thread listing
-- [ ] `GET /api/threads/:id` - load message history
-- [ ] `POST /api/threads/:id/messages` - validate and stream a chat response
-- [ ] `PATCH /api/threads/:id/pin` - toggle pin status
-- [ ] `DELETE /api/threads/:id` - delete a thread
-- [ ] `GET /api/threads/:id/export` - return a downloadable Markdown transcript
+- [x] `POST /api/threads` - create a thread
+- [x] `GET /api/threads?q=` - search, pin-first, and recent-first thread listing
+- [x] `GET /api/threads/:id` - load message history
+- [x] `POST /api/threads/:id/messages` - validate and stream a chat response
+- [x] `PATCH /api/threads/:id/pin` - toggle pin status
+- [x] `DELETE /api/threads/:id` - delete a thread
+- [x] `GET /api/threads/:id/export` - return a downloadable Markdown transcript
 
 ### 4. Backend Value-Adds
 
