@@ -15,12 +15,12 @@
 
 ### 1. Backend Foundation
 
-- [ ] Configure MongoDB connection in `backend/src/config/db.js`
-- [ ] Create the Thread Mongoose model
-- [ ] Add message structure, timestamps, tone, pin status, and response metrics
-- [ ] Create the Express server entry point
-- [ ] Add request validation and consistent JSON error responses
-- [ ] Add backend scripts for development and startup
+- [x] Configure MongoDB connection in `backend/src/config/db.js`
+- [x] Create the Thread Mongoose model
+- [x] Add message structure, timestamps, tone, pin status, and response metrics
+- [x] Create the Express server entry point
+- [x] Add request validation and consistent JSON error responses
+- [x] Add backend scripts for development and startup
 
 ### 2. AI Service
 
