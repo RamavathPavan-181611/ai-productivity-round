@@ -24,12 +24,12 @@
 
 ### 2. AI Service
 
-- [ ] Map Professional, Casual, and Concise tones to system instructions
-- [ ] Integrate OpenAI streaming
-- [ ] Integrate Claude streaming
-- [ ] Add a server-side fallback response when no API key is available
-- [ ] Stream text to the browser using Server-Sent Events
-- [ ] Abort or handle provider failures safely
+- [x] Map Professional, Casual, and Concise tones to system instructions
+- [x] Integrate OpenAI streaming
+- [x] Integrate Claude streaming
+- [x] Add a server-side fallback response when no API key is available
+- [x] Stream text to the browser using Server-Sent Events
+- [x] Abort or handle provider failures safely
 
 ### 3. Thread API
 
