@@ -6,6 +6,7 @@ const {
   getFallbackResponse,
   createAIStream,
   createTokenEstimate,
+  calculateResponseMetrics,
 } = require("../src/services/aiService");
 const {
   createSmartTitle,
@@ -62,4 +63,11 @@ test("builds a server-side Markdown transcript with response metrics", () => {
   assert.match(markdown, /^# MongoDB caching/m);
   assert.match(markdown, /### User/);
   assert.match(markdown, /Latency: 42 ms \| Words: 5 \| Estimated tokens: 8/);
+});
+
+test("calculates response metrics on the server", () => {
+  const metrics = calculateResponseMetrics("MongoDB caches frequent reads.", Date.now() - 25);
+  assert.ok(metrics.latencyMs >= 25);
+  assert.equal(metrics.wordCount, 4);
+  assert.ok(metrics.tokenCount > 0);
 });

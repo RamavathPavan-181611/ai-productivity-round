@@ -43,11 +43,11 @@
 
 ### 4. Backend Value-Adds
 
-- [ ] Generate and update a smart thread title from the first prompt
-- [ ] Compile Markdown transcripts on the server
-- [ ] Calculate response latency in milliseconds
-- [ ] Calculate response word count
-- [ ] Add estimated token count or provider token metrics
+- [x] Generate and update a smart thread title from the first prompt
+- [x] Compile Markdown transcripts on the server
+- [x] Calculate response latency in milliseconds
+- [x] Calculate response word count
+- [x] Add estimated token count or provider token metrics
 
 ### 5. Frontend UI
 

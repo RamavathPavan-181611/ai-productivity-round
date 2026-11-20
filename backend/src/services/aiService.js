@@ -32,6 +32,16 @@ function createTokenEstimate(text) {
   return words.length ? Math.ceil(words.join(" ").length / 4) : 0;
 }
 
+function calculateResponseMetrics(text, startedAt) {
+  const content = String(text || "");
+  const trimmed = content.trim();
+  return {
+    latencyMs: Math.max(0, Date.now() - startedAt),
+    wordCount: trimmed ? trimmed.split(/\s+/).filter(Boolean).length : 0,
+    tokenCount: createTokenEstimate(content),
+  };
+}
+
 async function streamOpenAI({ prompt, tone, history, signal }) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return null;
@@ -261,4 +271,5 @@ module.exports = {
   streamToSse,
   writeSseEvent,
   createTokenEstimate,
+  calculateResponseMetrics,
 };
