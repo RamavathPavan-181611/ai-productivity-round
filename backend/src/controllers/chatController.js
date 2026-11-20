@@ -227,26 +227,7 @@ async function exportThread(req, res, next) {
       return res.status(404).json({ error: "Thread not found" });
     }
 
-    const lines = [
-      `# ${thread.title}`,
-      "",
-      `Exported: ${new Date().toISOString()}`,
-      "",
-      "## Conversation",
-      "",
-    ];
-
-    for (const message of thread.messages) {
-      const speaker = message.role === "user" ? "User" : "Assistant";
-      lines.push(`### ${speaker}`, "", message.content, "");
-
-      if (message.role === "assistant" && message.metrics) {
-        lines.push(
-          `*Latency: ${message.metrics.latencyMs || 0} ms | Words: ${message.metrics.wordCount || 0} | Estimated tokens: ${message.metrics.tokenCount || 0}*`,
-          "",
-        );
-      }
-    }
+    const markdown = buildMarkdownTranscript(thread);
 
     const safeTitle =
       thread.title
@@ -259,10 +240,36 @@ async function exportThread(req, res, next) {
       "Content-Disposition",
       `attachment; filename="${safeTitle}-${thread._id}.md"`,
     );
-    res.send(lines.join("\n"));
+    res.send(markdown);
   } catch (error) {
     next(error);
   }
+
+}
+
+function buildMarkdownTranscript(thread) {
+  const lines = [
+    `# ${thread.title}`,
+    "",
+    `Exported: ${new Date().toISOString()}`,
+    "",
+    "## Conversation",
+    "",
+  ];
+
+  for (const message of thread.messages || []) {
+    const speaker = message.role === "user" ? "User" : "Assistant";
+    lines.push(`### ${speaker}`, "", message.content, "");
+
+    if (message.role === "assistant" && message.metrics) {
+      lines.push(
+        `*Latency: ${message.metrics.latencyMs || 0} ms | Words: ${message.metrics.wordCount || 0} | Estimated tokens: ${message.metrics.tokenCount || 0}*`,
+        "",
+      );
+    }
+  }
+
+  return lines.join("\n");
 }
 
 module.exports = {
@@ -274,4 +281,5 @@ module.exports = {
   deleteThread,
   exportThread,
   createSmartTitle,
+  buildMarkdownTranscript,
 };

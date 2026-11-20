@@ -7,6 +7,10 @@ const {
   createAIStream,
   createTokenEstimate,
 } = require("../src/services/aiService");
+const {
+  createSmartTitle,
+  buildMarkdownTranscript,
+} = require("../src/controllers/chatController");
 
 test("maps every supported tone to a system instruction", () => {
   assert.equal(Object.keys(TONE_INSTRUCTIONS).length, 3);
@@ -32,4 +36,30 @@ test("returns a useful fallback response without provider keys", async () => {
 test("estimates tokens and preserves zero for empty text", () => {
   assert.equal(createTokenEstimate(""), 0);
   assert.equal(createTokenEstimate("hello world"), 3);
+});
+
+test("generates a compact smart title from the first prompt", () => {
+  assert.equal(
+    createSmartTitle("Explain MongoDB indexing for a beginner"),
+    "Explain MongoDB indexing for a beginner",
+  );
+  assert.equal(createSmartTitle("!!!"), "New conversation");
+});
+
+test("builds a server-side Markdown transcript with response metrics", () => {
+  const markdown = buildMarkdownTranscript({
+    title: "MongoDB caching",
+    messages: [
+      { role: "user", content: "Explain caching" },
+      {
+        role: "assistant",
+        content: "Caching stores frequently used data.",
+        metrics: { latencyMs: 42, wordCount: 5, tokenCount: 8 },
+      },
+    ],
+  });
+
+  assert.match(markdown, /^# MongoDB caching/m);
+  assert.match(markdown, /### User/);
+  assert.match(markdown, /Latency: 42 ms \| Words: 5 \| Estimated tokens: 8/);
 });
