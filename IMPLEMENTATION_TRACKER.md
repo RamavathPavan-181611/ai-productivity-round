@@ -66,14 +66,14 @@
 
 ### 6. Integration and Verification
 
-- [ ] Start MongoDB locally or provide a MongoDB connection for evaluation
-- [ ] Verify thread creation and history loading
-- [ ] Verify all three tone modes
-- [ ] Verify real-time streaming with and without an API key
-- [ ] Verify search, pinning, deletion, and export
+- [x] Start MongoDB locally or provide a MongoDB connection for evaluation
+- [x] Verify thread creation and history loading
+- [x] Verify all three tone modes
+- [x] Verify real-time streaming with and without an API key
+- [x] Verify search, pinning, deletion, and export
 - [ ] Verify mobile and desktop layouts
-- [ ] Verify backend and frontend builds
-- [ ] Add setup and environment instructions to `README.md`
+- [x] Verify backend and frontend builds
+- [x] Add setup and environment instructions to `README.md`
 
 ### 7. Final Submission
 
